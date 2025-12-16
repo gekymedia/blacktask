@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-    $table->string('recurrence')->nullable(); // 'daily', 'weekly', 'monthly', 'yearly'
-    $table->date('recurrence_ends_at')->nullable();
-});
+            $table->string('recurrence')->nullable(); // 'daily', 'weekly', 'monthly', 'yearly'
+            $table->date('recurrence_ends_at')->nullable();
+        });
     }
 
     /**
@@ -22,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn(['recurrence', 'recurrence_ends_at']);
+        });
     }
 };

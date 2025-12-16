@@ -1,79 +1,145 @@
 <?php
-// app/Http/Controllers/TaskController.php
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
+use App\Services\TaskService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Illuminate\View\View;
 
 class TaskController extends Controller
 {
-    // app/Http/Controllers/TaskController.php
-public function index()
-{
-    $tasks = auth()->user()->tasks()
-                ->whereDate('task_date', today())
-                ->latest()
-                ->get();
-                
-    return view('tasks', compact('tasks'));
-}
+    use AuthorizesRequests;
+    
+    protected TaskService $taskService;
 
-public function store(Request $request)
-{
-    $task = auth()->user()->tasks()->create([
-        'title' => $request->title,
-        'task_date' => today()
-    ]);
-    
-    return response()->json($task, 201);
-}
-    // Toggle task completion status
-  // app/Http/Controllers/TaskController.php
-public function toggle(Task $task)
-{
-    if ($task->is_done && $task->recurrence) {
-        // Clone the task for recurrence
-        $newTask = $task->replicate();
-        $newTask->is_done = false;
-        
-        switch($task->recurrence) {
-            case 'daily':
-                $newTask->task_date = $task->task_date->addDay();
-                break;
-            case 'weekly':
-                $newTask->task_date = $task->task_date->addWeek();
-                break;
-            case 'monthly':
-                $newTask->task_date = $task->task_date->addMonth();
-                break;
-            case 'yearly':
-                $newTask->task_date = $task->task_date->addYear();
-                break;
-        }
-        
-        if (!$task->recurrence_ends_at || $newTask->task_date <= $task->recurrence_ends_at) {
-            $newTask->save();
-        }
-    }
-    
-    $task->update(['is_done' => !$task->is_done]);
-    
-    return response()->json(['success' => true]);
-}
-
-    // Reschedule task to tomorrow
-    public function reschedule(Task $task)
+    public function __construct(TaskService $taskService)
     {
-        $task->update(['task_date' => today()->addDay()]);
-        return response()->json(['success' => true]);
+        $this->taskService = $taskService;
     }
 
-    // Delete a task
-    public function destroy(Task $task)
+    /**
+     * Display today's tasks.
+     */
+    public function index(): View
     {
-        $task->delete();
-        return response()->json(['success' => true]);
+        $tasks = $this->taskService->getTodaysTasks(auth()->user());
+        
+        return view('tasks-new', compact('tasks'));
+    }
+
+    /**
+     * Store a newly created task.
+     */
+    public function store(StoreTaskRequest $request): JsonResponse
+    {
+        try {
+            $task = $this->taskService->createTask(
+                auth()->user(),
+                $request->validated()
+            );
+            
+            return response()->json($task->load('category'), 201);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to create task. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Update the specified task.
+     */
+    public function update(UpdateTaskRequest $request, Task $task): JsonResponse
+    {
+        $this->authorize('update', $task);
+
+        try {
+            $updatedTask = $this->taskService->updateTask(
+                $task,
+                $request->validated()
+            );
+            
+            return response()->json($updatedTask->load('category'));
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to update task. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Toggle task completion status.
+     */
+    public function toggle(Task $task): JsonResponse
+    {
+        $this->authorize('update', $task);
+
+        try {
+            $updatedTask = $this->taskService->toggleTask($task);
+            
+            return response()->json([
+                'success' => true,
+                'task' => $updatedTask
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to toggle task. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Reschedule task to tomorrow.
+     */
+    public function reschedule(Task $task): JsonResponse
+    {
+        $this->authorize('update', $task);
+
+        try {
+            $updatedTask = $this->taskService->rescheduleToTomorrow($task);
+            
+            return response()->json([
+                'success' => true,
+                'task' => $updatedTask
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to reschedule task. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a task.
+     */
+    public function destroy(Task $task): JsonResponse
+    {
+        $this->authorize('delete', $task);
+
+        try {
+            $this->taskService->deleteTask($task);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Task deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to delete task. Please try again.'
+            ], 500);
+        }
     }
 }

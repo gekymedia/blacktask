@@ -60,6 +60,17 @@
                     @enderror
                 </div>
 
+                <!-- Phone Number -->
+                <div class="mb-4">
+                    <label for="phone" class="block text-sm font-medium mb-1">Phone Number (Optional)</label>
+                    <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" placeholder="+1234567890"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark transition-colors">
+                    <p class="mt-1 text-xs text-gray-500">For SMS and WhatsApp notifications</p>
+                    @error('phone')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Password -->
                 <div class="mb-4">
                     <label for="password" class="block text-sm font-medium mb-1">Password</label>

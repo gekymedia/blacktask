@@ -15,6 +15,15 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         <i class="fas fa-tachometer-alt mr-2"></i>{{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
+                        <i class="fas fa-tasks mr-2"></i>{{ __('Tasks') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.*')">
+                        <i class="fas fa-calendar mr-2"></i>{{ __('Calendar') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.*')">
+                        <i class="fas fa-chart-line mr-2"></i>{{ __('Analytics') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -48,6 +57,12 @@
                             <x-dropdown-link :href="route('profile.edit')">
                                 <i class="fas fa-user mr-2"></i>{{ __('Profile') }}
                             </x-dropdown-link>
+                            
+                            <x-dropdown-link :href="route('settings.index')">
+                                <i class="fas fa-cog mr-2"></i>{{ __('Settings') }}
+                            </x-dropdown-link>
+
+                            <div class="border-t border-gray-100 dark:border-gray-700"></div>
 
                             <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}">
@@ -81,6 +96,15 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 <i class="fas fa-tachometer-alt mr-2"></i>{{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
+                <i class="fas fa-tasks mr-2"></i>{{ __('Tasks') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.*')">
+                <i class="fas fa-calendar mr-2"></i>{{ __('Calendar') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.*')">
+                <i class="fas fa-chart-line mr-2"></i>{{ __('Analytics') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
@@ -98,6 +122,10 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     <i class="fas fa-user mr-2"></i>{{ __('Profile') }}
                 </x-responsive-nav-link>
+                
+                <x-responsive-nav-link :href="route('settings.index')">
+                    <i class="fas fa-cog mr-2"></i>{{ __('Settings') }}
+                </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
@@ -112,17 +140,3 @@
         </div>
     </div>
 </nav>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', function() {
-                const html = document.documentElement;
-                html.classList.toggle('dark');
-                localStorage.setItem('dark-mode', html.classList.contains('dark'));
-            });
-        }
-    });
-</script>

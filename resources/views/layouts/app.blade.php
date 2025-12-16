@@ -83,31 +83,41 @@
         </div>
     </div>
 
+    <!-- Page-specific scripts -->
+    @stack('scripts')
+
     <script>
-        $(document).ready(function() {
-            // Theme handling
+        // Theme handling - Load immediately
+        (function() {
             if (localStorage.getItem('dark-mode') === 'true' || 
                 (!localStorage.getItem('dark-mode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
                 localStorage.setItem('dark-mode', 'true');
             }
+        })();
 
-            // Add theme toggle to your navigation if needed
-            $('#theme-toggle').click(function() {
-                $('html').toggleClass('dark');
-                localStorage.setItem('dark-mode', $('html').hasClass('dark'));
+        // Initialize after DOM is ready
+        $(document).ready(function() {
+            // Theme toggle handler
+            $(document).on('click', '#theme-toggle', function() {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('dark-mode', isDark);
             });
 
             // Natural language processing (can be used in task forms)
-            function parseNaturalLanguage(input) {
-                const result = chrono.parse(input)[0];
-                if (!result) return { title: input, date: null };
-                
-                const date = result.start.date();
-                const title = input.replace(result.text, '').trim();
-                
-                return { title, date };
-            }
+            window.parseNaturalLanguage = function(input) {
+                if (typeof chrono !== 'undefined') {
+                    const result = chrono.parse(input)[0];
+                    if (!result) return { title: input, date: null };
+                    
+                    const date = result.start.date();
+                    const title = input.replace(result.text, '').trim();
+                    
+                    return { title, date };
+                }
+                return { title: input, date: null };
+            };
         });
     </script>
 </body>

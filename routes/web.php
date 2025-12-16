@@ -1,51 +1,57 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication routes
 require __DIR__ . '/auth.php';
 
+// Redirect root to dashboard for authenticated users
+Route::get('/', function () {
+    return auth()->check() 
+        ? redirect()->route('dashboard') 
+        : redirect()->route('login');
+});
+
 // Dashboard
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
 
 // Profile routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+    Route::patch('/', [ProfileController::class, 'update'])->name('update');
+    Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
 });
 
 // Task routes (web interface)
-Route::middleware('auth')->group(function () {
-    Route::get('/', [TaskController::class, 'index'])->name('tasks.index');
-    Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
-    Route::patch('/tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
-    Route::post('/tasks/{task}/reschedule', [TaskController::class, 'reschedule'])->name('tasks.reschedule');
-    Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+Route::middleware('auth')->prefix('tasks')->name('tasks.')->group(function () {
+    Route::get('/', [TaskController::class, 'index'])->name('index');
+    Route::post('/', [TaskController::class, 'store'])->name('store');
+    Route::patch('/{task}', [TaskController::class, 'update'])->name('update');
+    Route::patch('/{task}/toggle', [TaskController::class, 'toggle'])->name('toggle');
+    Route::post('/{task}/reschedule', [TaskController::class, 'reschedule'])->name('reschedule');
+    Route::delete('/{task}', [TaskController::class, 'destroy'])->name('destroy');
 });
 
-// routes/web.php
-Route::prefix('api')->middleware('auth:sanctum')->group(function () {
-    Route::get('/tasks', function (\Illuminate\Http\Request $request) {
-        return $request->user()
-            ->tasks()
-            ->with('category')
-            ->get()
-            ->map(function ($task) {
-                return [
-                    'id' => $task->id,
-                    'title' => $task->title,
-                    'start' => $task->task_date->format('Y-m-d'),
-                    'color' => $task->category->color ?? '#3b82f6',
-                    'extendedProps' => [
-                        'priority' => $task->priority,
-                        'is_done' => $task->is_done
-                    ]
-                ];
-            });
-    });
+// Calendar routes
+Route::middleware('auth')->prefix('calendar')->name('calendar.')->group(function () {
+    Route::get('/', [CalendarController::class, 'index'])->name('index');
+});
+
+// Analytics routes
+Route::middleware('auth')->prefix('analytics')->name('analytics.')->group(function () {
+    Route::get('/', [AnalyticsController::class, 'index'])->name('index');
+});
+
+// Settings routes
+Route::middleware('auth')->prefix('settings')->name('settings.')->group(function () {
+    Route::get('/', [SettingsController::class, 'index'])->name('index');
+    Route::patch('/notifications', [SettingsController::class, 'updateNotifications'])->name('notifications.update');
 });

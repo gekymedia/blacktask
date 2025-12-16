@@ -20,7 +20,14 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'browser_notifications',
+        'email_notifications',
+        'whatsapp_notifications',
+        'sms_notifications',
+        'gekychat_notifications',
+        'notification_time',
     ];
 
     /**
@@ -43,6 +50,11 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'browser_notifications' => 'boolean',
+            'email_notifications' => 'boolean',
+            'whatsapp_notifications' => 'boolean',
+            'sms_notifications' => 'boolean',
+            'gekychat_notifications' => 'boolean',
         ];
     }
      public function tasks()

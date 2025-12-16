@@ -40,11 +40,15 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
-                <!-- Email -->
+                <!-- Email or Phone -->
                 <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium mb-1">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark transition-colors">
+                    <label for="login" class="block text-sm font-medium mb-1">Email or Phone Number</label>
+                    <input id="login" type="text" name="login" value="{{ old('login') }}" required autofocus
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark transition-colors"
+                        placeholder="Enter your email or phone number">
+                    @error('login')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
