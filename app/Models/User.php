@@ -27,6 +27,10 @@ class User extends Authenticatable
         'whatsapp_notifications',
         'sms_notifications',
         'gekychat_notifications',
+        'push_notifications',
+        'telegram_notifications',
+        'telegram_chat_id',
+        'push_token',
         'notification_time',
     ];
 
@@ -55,6 +59,8 @@ class User extends Authenticatable
             'whatsapp_notifications' => 'boolean',
             'sms_notifications' => 'boolean',
             'gekychat_notifications' => 'boolean',
+            'push_notifications' => 'boolean',
+            'telegram_notifications' => 'boolean',
         ];
     }
      public function tasks()

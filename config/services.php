@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'gekychat' => [
+        // Platform API is on api subdomain, not chat subdomain
+        // Routes are at: api.gekychat.test/platform/oauth/token
+        // So base_url should be just the domain (no /api prefix)
+        'base_url' => env('GEKYCHAT_API_URL', env('APP_ENV') === 'local' ? 'http://api.gekychat.test' : 'https://api.gekychat.com'),
+        'client_id' => env('GEKYCHAT_CLIENT_ID'),
+        'client_secret' => env('GEKYCHAT_CLIENT_SECRET'),
+        'system_bot_user_id' => (int) env('GEKYCHAT_SYSTEM_BOT_USER_ID', 0),
+    ],
+
 ];

@@ -66,4 +66,79 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/categories', function (Request $request) {
         return $request->user()->categories;
     });
+
+    // Create task via API (for external integrations)
+    Route::post('/tasks', function (Request $request) {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'task_date' => ['nullable', 'date'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'priority' => ['nullable', 'integer', 'between:0,2'],
+            'reminder_at' => ['nullable', 'date'],
+        ]);
+
+        // Set default task_date to today if not provided
+        if (!isset($validated['task_date'])) {
+            $validated['task_date'] = today()->toDateString();
+        }
+
+        // Set default priority if not provided
+        if (!isset($validated['priority'])) {
+            $validated['priority'] = 1; // Medium priority
+        }
+
+        $task = $request->user()->tasks()->create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task created successfully',
+            'task' => $task->load('category')
+        ], 201);
+    });
+
+    // Update task via API (for external integrations)
+    Route::patch('/tasks/{task}', function (Request $request, \App\Models\Task $task) {
+        // Ensure task belongs to authenticated user
+        if ($task->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'title' => ['sometimes', 'string', 'max:255'],
+            'task_date' => ['sometimes', 'date'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'priority' => ['sometimes', 'integer', 'between:0,2'],
+            'reminder_at' => ['nullable', 'date'],
+            'is_done' => ['sometimes', 'boolean'],
+        ]);
+
+        $task->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task updated successfully',
+            'task' => $task->load('category')
+        ]);
+    });
+
+    // Delete task via API (for external integrations)
+    Route::delete('/tasks/{task}', function (Request $request, \App\Models\Task $task) {
+        // Ensure task belongs to authenticated user
+        if ($task->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $task->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task deleted successfully'
+        ]);
+    });
 });

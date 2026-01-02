@@ -24,7 +24,7 @@
 - 🗣️ **Natural Language Input** - "Buy groceries tomorrow" automatically schedules for tomorrow
 - 📊 **Analytics** - Track productivity and completion rates
 - 📆 **Calendar View** - Visual calendar representation of tasks
-- 🔔 **Task Reminders** - Optional reminder timestamps
+- 🔔 **Multi-Channel Notifications** - Browser, email, WhatsApp, SMS, GeKyChat, push, and Telegram notifications
 - 📈 **Statistics Dashboard** - Insights into your task completion patterns
 
 ---
@@ -210,6 +210,18 @@ php artisan test tests/Feature/TaskManagementTest.php
 
 # Run with coverage
 php artisan test --coverage
+```
+
+### Notification System
+
+BLACKTASK includes a comprehensive multi-channel notification system supporting browser notifications, email, WhatsApp, SMS, GeKyChat, push notifications, and Telegram. See the [Notification System Guide](NOTIFICATION_SYSTEM_GUIDE.md) for complete setup and configuration details.
+
+```bash
+# Generate VAPID keys for push notifications
+php artisan notifications:generate-vapid-keys
+
+# Test notification channels
+php artisan notifications:test user@example.com
 ```
 
 ### Test Structure

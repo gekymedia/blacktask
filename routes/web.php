@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\PushController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication routes
@@ -54,4 +56,20 @@ Route::middleware('auth')->prefix('analytics')->name('analytics.')->group(functi
 Route::middleware('auth')->prefix('settings')->name('settings.')->group(function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index');
     Route::patch('/notifications', [SettingsController::class, 'updateNotifications'])->name('notifications.update');
+});
+
+// Telegram routes
+Route::prefix('telegram')->name('telegram.')->group(function () {
+    Route::post('/webhook', [TelegramController::class, 'webhook'])->name('webhook');
+    Route::middleware('auth')->group(function () {
+        Route::post('/setup', [TelegramController::class, 'setup'])->name('setup');
+        Route::post('/disconnect', [TelegramController::class, 'disconnect'])->name('disconnect');
+    });
+});
+
+// Push notification routes
+Route::middleware('auth')->prefix('push')->name('push.')->group(function () {
+    Route::post('/subscribe', [PushController::class, 'subscribe'])->name('subscribe');
+    Route::post('/unsubscribe', [PushController::class, 'unsubscribe'])->name('unsubscribe');
+    Route::get('/vapid-public-key', [PushController::class, 'vapidPublicKey'])->name('vapid-public-key');
 });

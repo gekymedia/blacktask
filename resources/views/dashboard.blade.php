@@ -245,6 +245,12 @@
                                 body: 'You will now receive reminders for your tasks.',
                                 icon: '/favicon.ico'
                             });
+
+                            // Also setup push notifications if supported
+                            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                                setupPushNotifications();
+                            }
+
                             $(this).html('<i class="fas fa-check mr-2"></i> Notifications Enabled');
                             $(this).removeClass('bg-blue-500 hover:bg-blue-600').addClass('bg-green-500');
                         }
@@ -256,6 +262,91 @@
             if ('Notification' in window && Notification.permission === 'granted') {
                 $('#request-notifications').html('<i class="fas fa-check mr-2"></i> Notifications Enabled');
                 $('#request-notifications').removeClass('bg-blue-500 hover:bg-blue-600').addClass('bg-green-500');
+
+                // Setup push notifications if not already done
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    setupPushNotifications();
+                }
+            }
+
+            // Push notification setup function
+            function setupPushNotifications() {
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                            return registration.pushManager.getSubscription()
+                                .then(function(subscription) {
+                                    if (subscription) {
+                                        return subscription;
+                                    }
+
+                                    // Get VAPID public key
+                                    return fetch('/push/vapid-public-key')
+                                        .then(function(response) {
+                                            return response.json();
+                                        })
+                                        .then(function(data) {
+                                            if (data.success) {
+                                                const vapidPublicKey = urlBase64ToUint8Array(data.public_key);
+                                                return registration.pushManager.subscribe({
+                                                    userVisibleOnly: true,
+                                                    applicationServerKey: vapidPublicKey
+                                                });
+                                            }
+                                        });
+                                });
+                        })
+                        .then(function(subscription) {
+                            if (subscription) {
+                                // Send subscription to server
+                                return fetch('/push/subscribe', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({
+                                        subscription: {
+                                            endpoint: subscription.endpoint,
+                                            keys: {
+                                                auth: arrayBufferToBase64(subscription.getKey('auth')),
+                                                p256dh: arrayBufferToBase64(subscription.getKey('p256dh'))
+                                            }
+                                        }
+                                    })
+                                });
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Push notification setup failed:', error);
+                        });
+                }
+            }
+
+            // Helper functions for push notifications
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding)
+                    .replace(/-/g, '+')
+                    .replace(/_/g, '/');
+
+                const rawData = window.atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
+
+            function arrayBufferToBase64(buffer) {
+                let binary = '';
+                const bytes = new Uint8Array(buffer);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return window.btoa(binary);
             }
 
             // Task checkbox toggle

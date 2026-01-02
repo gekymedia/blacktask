@@ -127,6 +127,47 @@
                     </label>
                 </div>
 
+                <!-- Push Notifications -->
+                <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-start">
+                        <div class="mr-4 text-red-600 dark:text-red-400">
+                            <i class="fas fa-mobile-alt text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Push Notifications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Receive push notifications on mobile devices</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="push_notifications" class="sr-only peer" {{ $user->push_notifications ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <!-- Telegram Notifications -->
+                <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-start">
+                        <div class="mr-4 text-blue-500 dark:text-blue-400">
+                            <i class="fab fa-telegram-plane text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Telegram Notifications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Get notified on Telegram
+                                @if($user->telegram_chat_id)
+                                    (Connected)
+                                @else
+                                    <a href="#" id="telegram-setup" class="text-blue-600 underline">Setup Telegram</a>
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="telegram_notifications" class="sr-only peer" {{ $user->telegram_notifications ? 'checked' : '' }} {{ !$user->telegram_chat_id ? 'disabled' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 {{ !$user->telegram_chat_id ? 'opacity-50 cursor-not-allowed' : '' }}"></div>
+                    </label>
+                </div>
+
                 <!-- Notification Time -->
                 <div class="flex items-center justify-between py-4">
                     <div class="flex items-start">
@@ -181,6 +222,8 @@
                     whatsapp_notifications: $('[name="whatsapp_notifications"]').is(':checked'),
                     sms_notifications: $('[name="sms_notifications"]').is(':checked'),
                     gekychat_notifications: $('[name="gekychat_notifications"]').is(':checked'),
+                    push_notifications: $('[name="push_notifications"]').is(':checked'),
+                    telegram_notifications: $('[name="telegram_notifications"]').is(':checked'),
                     notification_time: $('[name="notification_time"]').val(),
                     _token: '{{ csrf_token() }}'
                 };
@@ -211,6 +254,22 @@
             $('[name="browser_notifications"]').change(function() {
                 if ($(this).is(':checked') && 'Notification' in window) {
                     Notification.requestPermission();
+                }
+            });
+
+            // Telegram setup
+            $('#telegram-setup').click(function(e) {
+                e.preventDefault();
+
+                const botInfo = @json(app(\App\Services\NotificationService::class)->getTelegramBotInfo());
+
+                if (botInfo && botInfo.result && botInfo.result.username) {
+                    const botUsername = botInfo.result.username;
+                    const setupUrl = `https://t.me/${botUsername}?start=setup_${{ auth()->id() }}`;
+
+                    window.open(setupUrl, '_blank');
+                } else {
+                    alert('Telegram bot is not configured. Please contact administrator.');
                 }
             });
         });

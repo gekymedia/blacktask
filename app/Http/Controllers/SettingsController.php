@@ -29,6 +29,8 @@ class SettingsController extends Controller
             'whatsapp_notifications' => 'boolean',
             'sms_notifications' => 'boolean',
             'gekychat_notifications' => 'boolean',
+            'push_notifications' => 'boolean',
+            'telegram_notifications' => 'boolean',
             'notification_time' => 'nullable|date_format:H:i',
         ]);
 

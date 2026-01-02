@@ -50,6 +50,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Push Notification Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure web push notifications (VAPID keys for browsers).
+    |
+    */
+    'push' => [
+        'enabled' => env('PUSH_ENABLED', false),
+        'vapid_public_key' => env('VAPID_PUBLIC_KEY'),
+        'vapid_private_key' => env('VAPID_PRIVATE_KEY'),
+        'subject' => env('VAPID_SUBJECT', 'mailto:admin@blacktask.com'),
+        'server_key' => env('FCM_SERVER_KEY'), // For mobile push
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure your Telegram Bot API credentials here.
+    |
+    */
+    'telegram' => [
+        'enabled' => env('TELEGRAM_ENABLED', false),
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'api_url' => env('TELEGRAM_API_URL', 'https://api.telegram.org/bot'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Notification Defaults
     |--------------------------------------------------------------------------
     |
