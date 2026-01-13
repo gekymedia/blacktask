@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - BLACKTASK</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('web_pwa/icon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('web_pwa/icon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('web_pwa/icon-48x48.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('web_pwa/icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('web_pwa/icon-512x512.png') }}">
+    <link rel="apple-touch-icon" sizes="192x192" href="{{ asset('web_pwa/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="512x512" href="{{ asset('web_pwa/icon-512x512.png') }}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -27,9 +43,10 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
     <div class="container mx-auto px-4 py-8 max-w-md">
         <!-- Header -->
-        <header class="flex justify-center items-center mb-8">
+        <header class="flex flex-col justify-center items-center mb-8">
+            <img src="{{ asset('web_pwa/icon-192x192.png') }}" alt="BlackTask Logo" class="w-20 h-20 mb-4">
             <h1 class="text-3xl font-bold text-primary-light dark:text-primary-dark">
-                <i class="fas fa-tasks mr-2"></i> BLACKTASK
+                BLACKTASK
             </h1>
         </header>
 
