@@ -16,6 +16,40 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
+    // Get user by phone number (for GekyChat integration)
+    Route::get('/users/by-phone', function (Request $request) {
+        $request->validate([
+            'phone' => 'required|string'
+        ]);
+
+        $user = \App\Models\User::where('phone', $request->phone)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found with this phone number'
+            ], 404);
+        }
+
+        // Generate API token if not exists
+        if (!$user->currentAccessToken()) {
+            $token = $user->createToken('gekychat-integration')->plainTextToken;
+        } else {
+            $token = $user->currentAccessToken()->token;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'api_token' => $token
+            ]
+        ]);
+    });
+
     // Get tasks (formatted for calendar/API consumption)
     Route::get('/tasks', function (Request $request) {
         $startDate = $request->query('start');
