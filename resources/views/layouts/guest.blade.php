@@ -14,13 +14,14 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
         <!-- Favicons -->
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('web_pwa/icon-16x16.png') }}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('web_pwa/icon-32x32.png') }}">
-        <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('web_pwa/icon-48x48.png') }}">
-        <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('web_pwa/icon-192x192.png') }}">
-        <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('web_pwa/icon-512x512.png') }}">
-        <link rel="apple-touch-icon" sizes="192x192" href="{{ asset('web_pwa/icon-192x192.png') }}">
-        <link rel="apple-touch-icon" sizes="512x512" href="{{ asset('web_pwa/icon-512x512.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/blacktask_16x16.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/blacktask_32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('favicon/blacktask_48x48.png') }}">
+        <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon/blacktask_64x64.png') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('pwa/blacktask_192x192.png') }}">
+        <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('pwa/blacktask_512x512.png') }}">
+        <link rel="apple-touch-icon" sizes="192x192" href="{{ asset('mobile/blacktask_192x192.png') }}">
+        <link rel="apple-touch-icon" sizes="512x512" href="{{ asset('mobile/blacktask_512x512.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -78,7 +79,7 @@
 
             <div class="mb-8">
                 <a href="/" class="flex flex-col items-center">
-                    <img src="{{ asset('web_pwa/icon-192x192.png') }}" alt="BlackTask Logo" class="w-20 h-20 mb-2">
+                    <img src="{{ asset('pwa/blacktask_192x192.png') }}" alt="BlackTask Logo" class="w-20 h-20 mb-2">
                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-200">BLACKTASK</span>
                 </a>
             </div>
