@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - BLACKTASK</title>
+    <title>Login - Blacktask</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#3B82F6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
@@ -31,8 +31,8 @@
                 extend: {
                     colors: {
                         primary: {
-                            light: '#4f46e5',
-                            dark: '#6366f1'
+                            light: '#3b82f6',
+                            dark: '#60a5fa'
                         }
                     }
                 }
@@ -45,9 +45,9 @@
     <div class="container mx-auto px-4 py-8 max-w-md">
         <!-- Header -->
         <header class="flex flex-col justify-center items-center mb-8">
-            <img src="{{ asset('pwa/blacktask_192x192.png') }}" alt="BlackTask Logo" class="w-20 h-20 mb-4">
+            <img src="{{ asset('pwa/blacktask_192x192.png') }}" alt="Blacktask" class="w-20 h-20 mb-4">
             <h1 class="text-3xl font-bold text-primary-light dark:text-primary-dark">
-                BLACKTASK
+                Blacktask
             </h1>
         </header>
 

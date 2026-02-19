@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLACKTASK - Daily Task Planner</title>
+    <title>Blacktask - Daily Task Planner</title>
     
     <!-- Using Tailwind via CDN for development (as in your original) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,8 +14,8 @@
                 extend: {
                     colors: {
                         primary: {
-                            light: '#4f46e5',
-                            dark: '#6366f1'
+                            light: '#3b82f6',
+                            dark: '#60a5fa'
                         }
                     }
                 }
@@ -28,7 +28,7 @@
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1/build/global/luxon.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#3B82F6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
@@ -70,7 +70,7 @@
         <!-- Header -->
         <header class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-primary-light dark:text-primary-dark">
-                <i class="fas fa-tasks mr-2"></i> BLACKTASK
+                <i class="fas fa-tasks mr-2"></i> Blacktask
             </h1>
             <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 <i class="fas fa-moon dark:hidden"></i>

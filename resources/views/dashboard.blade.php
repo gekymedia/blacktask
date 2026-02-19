@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-bold text-primary-light dark:text-primary-dark">
-                <i class="fas fa-tasks mr-2"></i> BLACKTASK Dashboard
+                <i class="fas fa-tasks mr-2"></i> Blacktask Dashboard
             </h1>
         </div>
     </x-slot>
@@ -241,7 +241,7 @@
                 if ('Notification' in window) {
                     Notification.requestPermission().then(function(permission) {
                         if (permission === 'granted') {
-                            new Notification('BLACKTASK Notifications Enabled!', {
+                            new Notification('Blacktask Notifications Enabled!', {
                                 body: 'You will now receive reminders for your tasks.',
                                 icon: '/favicon.ico'
                             });

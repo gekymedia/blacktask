@@ -1,19 +1,180 @@
 <?php
 
 use App\Models\Task;
+use App\Models\Category;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules;
 
 /**
  * API Routes - For external integrations and calendar features
- * All routes require Sanctum authentication
  */
 
+// Public API routes (no authentication required)
+Route::post('/login', function (Request $request) {
+    $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+        'device_name' => ['required', 'string'],
+    ]);
+
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
+    }
+
+    $user = Auth::user();
+    $token = $user->createToken($request->device_name)->plainTextToken;
+
+    return response()->json([
+        'success' => true,
+        'token' => $token,
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ],
+    ]);
+});
+
+// Register
+Route::post('/register', function (Request $request) {
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+        'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'device_name' => ['required', 'string'],
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->filled('phone') ? $request->phone : null,
+        'password' => Hash::make($request->password),
+    ]);
+
+    $token = $user->createToken($request->device_name)->plainTextToken;
+
+    return response()->json([
+        'success' => true,
+        'token' => $token,
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ],
+    ], 201);
+});
+
+// Forgot password - send reset link
+Route::post('/forgot-password', function (Request $request) {
+    $request->validate(['email' => ['required', 'email']]);
+
+    $status = Password::sendResetLink($request->only('email'));
+
+    if ($status != Password::RESET_LINK_SENT) {
+        return response()->json([
+            'success' => false,
+            'message' => __($status),
+        ], 400);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => __('Password reset link sent to your email.'),
+    ]);
+});
+
+// Google sign-in - exchange id_token for Sanctum token
+Route::post('/auth/google', function (Request $request) {
+    $request->validate([
+        'id_token' => ['required', 'string'],
+        'device_name' => ['required', 'string'],
+    ]);
+
+    $response = \Illuminate\Support\Facades\Http::get('https://oauth2.googleapis.com/tokeninfo', [
+        'id_token' => $request->id_token,
+    ]);
+
+    if (!$response->successful()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid Google token.',
+        ], 401);
+    }
+
+    $payload = $response->json();
+    $email = $payload['email'] ?? null;
+    $name = $payload['name'] ?? ($payload['email'] ?? 'User');
+    $googleId = $payload['sub'] ?? null;
+
+    if (!$email) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Email not provided by Google.',
+        ], 401);
+    }
+
+    $user = User::where('email', $email)->first();
+
+    if (!$user) {
+        $user = User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make(\Illuminate\Support\Str::random(32)),
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    $token = $user->createToken($request->device_name)->plainTextToken;
+
+    return response()->json([
+        'success' => true,
+        'token' => $token,
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ],
+    ]);
+});
+
+// Protected API routes (require Sanctum authentication)
 Route::middleware('auth:sanctum')->group(function () {
     
     // Get user information
     Route::get('/user', function (Request $request) {
         return $request->user();
+    });
+
+    // Update user profile
+    Route::put('/user', function (Request $request) {
+        $validated = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
+        ]);
+
+        $user = $request->user();
+        $user->fill($validated);
+        
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+        
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'user' => $user->fresh(),
+        ]);
     });
 
     // Get user by phone number (for GekyChat integration)
@@ -50,10 +211,11 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
     });
 
-    // Get tasks (formatted for calendar/API consumption)
+    // Get tasks (supports both calendar format and full format)
     Route::get('/tasks', function (Request $request) {
         $startDate = $request->query('start');
         $endDate = $request->query('end');
+        $format = $request->query('format', 'full'); // 'full' or 'calendar'
         
         $query = $request->user()->tasks()->with('category');
         
@@ -65,18 +227,44 @@ Route::middleware('auth:sanctum')->group(function () {
             $query->where('task_date', '<=', $endDate);
         }
         
-        return $query->get()->map(function ($task) {
+        $tasks = $query->get();
+        
+        // Return calendar format if requested
+        if ($format === 'calendar') {
+            return $tasks->map(function ($task) {
+                return [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'start' => $task->task_date?->format('Y-m-d'),
+                    'color' => $task->category->color ?? '#3b82f6',
+                    'allDay' => true,
+                    'extendedProps' => [
+                        'priority' => $task->priority,
+                        'is_done' => $task->is_done,
+                        'category' => $task->category?->name,
+                    ]
+                ];
+            });
+        }
+        
+        // Return full task format (default for Flutter app)
+        return $tasks->map(function ($task) {
             return [
                 'id' => $task->id,
                 'title' => $task->title,
-                'start' => $task->task_date->format('Y-m-d'),
-                'color' => $task->category->color ?? '#3b82f6',
-                'allDay' => true,
-                'extendedProps' => [
-                    'priority' => $task->priority,
-                    'is_done' => $task->is_done,
-                    'category' => $task->category?->name,
-                ]
+                'task_date' => $task->task_date?->format('Y-m-d'),
+                'reminder_at' => $task->reminder_at?->toIso8601String(),
+                'category_id' => $task->category_id,
+                'priority' => $task->priority,
+                'is_done' => $task->is_done,
+                'user_id' => $task->user_id,
+                'created_at' => $task->created_at?->toIso8601String(),
+                'updated_at' => $task->updated_at?->toIso8601String(),
+                'category' => $task->category ? [
+                    'id' => $task->category->id,
+                    'name' => $task->category->name,
+                    'color' => $task->category->color,
+                ] : null,
             ];
         });
     });
@@ -99,6 +287,72 @@ Route::middleware('auth:sanctum')->group(function () {
     // Get categories
     Route::get('/categories', function (Request $request) {
         return $request->user()->categories;
+    });
+
+    // Create category via API
+    Route::post('/categories', function (Request $request) {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+        ]);
+
+        $category = $request->user()->categories()->create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category created successfully',
+            'category' => $category
+        ], 201);
+    });
+
+    // Update category via API
+    Route::put('/categories/{category}', function (Request $request, Category $category) {
+        // Ensure category belongs to authenticated user
+        if ($category->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'color' => ['sometimes', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+        ]);
+
+        $category->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category updated successfully',
+            'category' => $category
+        ]);
+    });
+
+    // Delete category via API
+    Route::delete('/categories/{category}', function (Request $request, Category $category) {
+        // Ensure category belongs to authenticated user
+        if ($category->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // Check if category has tasks
+        if ($category->tasks()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete category with existing tasks'
+            ], 422);
+        }
+
+        $category->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category deleted successfully'
+        ]);
     });
 
     // Create task via API (for external integrations)

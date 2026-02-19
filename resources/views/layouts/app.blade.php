@@ -9,7 +9,7 @@
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#3B82F6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Additional Resources from BLACKTASK -->
+    <!-- Additional Resources -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chrono-node@2.3.5/dist/chrono.min.js"></script>
@@ -40,8 +40,8 @@
                 extend: {
                     colors: {
                         primary: {
-                            light: '#4f46e5',
-                            dark: '#6366f1'
+                            light: '#3b82f6',
+                            dark: '#60a5fa'
                         }
                     }
                 }

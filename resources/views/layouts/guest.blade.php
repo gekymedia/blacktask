@@ -9,7 +9,7 @@
 
         <!-- PWA Manifest -->
         <link rel="manifest" href="{{ asset('manifest.json') }}">
-        <meta name="theme-color" content="#000000">
+        <meta name="theme-color" content="#3B82F6">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
@@ -27,7 +27,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Additional Resources from BLACKTASK -->
+        <!-- Additional Resources -->
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -39,8 +39,8 @@
                     extend: {
                         colors: {
                             primary: {
-                                light: '#4f46e5',
-                                dark: '#6366f1'
+                                light: '#3b82f6',
+                                dark: '#60a5fa'
                             }
                         }
                     }
@@ -60,8 +60,8 @@
                 transition: all 0.2s ease;
             }
             .input-field:focus {
-                border-color: '#4f46e5';
-                box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
             }
         </style>
 
@@ -79,8 +79,8 @@
 
             <div class="mb-8">
                 <a href="/" class="flex flex-col items-center">
-                    <img src="{{ asset('pwa/blacktask_192x192.png') }}" alt="BlackTask Logo" class="w-20 h-20 mb-2">
-                    <span class="text-2xl font-bold text-gray-800 dark:text-gray-200">BLACKTASK</span>
+                    <img src="{{ asset('pwa/blacktask_192x192.png') }}" alt="Blacktask" class="w-20 h-20 mb-2">
+                    <span class="text-2xl font-bold text-gray-800 dark:text-gray-200">Blacktask</span>
                 </a>
             </div>
 
