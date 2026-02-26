@@ -11,6 +11,53 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+// GekyChat SSO - Auto-login via phone number
+Route::get('auth/gekychat-sso', function (\Illuminate\Http\Request $request) {
+    $phone = $request->query('phone');
+    $source = $request->query('source');
+    $autoLogin = $request->query('auto_login') === 'true';
+    
+    // Validate request is from GekyChat
+    if ($source !== 'gekychat' || !$phone) {
+        return redirect()->route('login')->with('error', 'Invalid SSO request');
+    }
+    
+    // Find user by phone number
+    $user = \App\Models\User::where('phone', $phone)->first();
+    
+    if (!$user) {
+        // User doesn't exist - redirect to register with phone pre-filled
+        return redirect()->route('register')->with([
+            'phone' => $phone,
+            'from_gekychat' => true,
+            'message' => 'Create a BlackTask account to continue',
+        ]);
+    }
+    
+    // Auto-login the user
+    if ($autoLogin) {
+        \Illuminate\Support\Facades\Auth::login($user);
+        $request->session()->regenerate();
+        
+        // Check if there's a recipient to send task to
+        $recipientId = $request->query('recipient_id');
+        $recipientName = $request->query('recipient_name');
+        
+        if ($recipientId || $recipientName) {
+            // Redirect to task creation with recipient info
+            return redirect()->route('tasks.index')->with([
+                'share_to_gekychat' => true,
+                'recipient_id' => $recipientId,
+                'recipient_name' => $recipientName,
+            ]);
+        }
+        
+        return redirect()->intended(route('dashboard'));
+    }
+    
+    return redirect()->route('login')->with('phone', $phone);
+})->name('gekychat.sso');
+
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
